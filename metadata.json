@@ -1,0 +1,5 @@
+{
+  "name": "Salama Ride",
+  "description": "A modern Kenyan transport booking platform for safe and reliable rides.",
+  "requestFramePermissions": ["geolocation"]
+}

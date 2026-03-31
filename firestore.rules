@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - name: string (required)
+    //   - phone: string (required)
+    //   - isAdmin: bool (required)
+    //   - createdAt: timestamp (optional)
+    //
+    // Collection: drivers
+    // Document ID: {driverId}
+    // Fields:
+    //   - name: string (required)
+    //   - vehicleType: string (required, enum: Economy, Comfort, Bodaboda)
+    //   - carModel: string (required)
+    //   - plateNumber: string (required)
+    //   - rating: number (required)
+    //   - pricePerKm: number (required)
+    //   - imageUrl: string (optional)
+    //
+    // Collection: rides
+    // Document ID: {rideId}
+    // Fields:
+    //   - userId: string (required)
+    //   - driverId: string (required)
+    //   - pickup: string (required)
+    //   - destination: string (required)
+    //   - distance: number (required)
+    //   - fare: number (required)
+    //   - status: string (required, enum: Pending, Accepted, Completed, Cancelled)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: payments
+    // Document ID: {paymentId}
+    // Fields:
+    //   - userId: string (required)
+    //   - rideId: string (required)
+    //   - amount: number (required)
+    //   - method: string (required)
+    //   - status: string (required)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        ((request.auth.token.email == "calekurugat254@gmail.com" && request.auth.token.email_verified == true) ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidUser(data) {
+      return data.name is string && data.name.size() > 0 &&
+             data.isAdmin is bool;
+    }
+
+    function isValidRide(data) {
+      return data.userId == request.auth.uid &&
+             data.status in ['Pending', 'Accepted', 'Completed', 'Cancelled'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && 
+                    (request.resource.data.isAdmin == false || request.auth.token.email == "calekurugat254@gmail.com");
+      allow update: if isAuthenticated() && (isAdmin() || (isOwner(userId) && request.resource.data.isAdmin == resource.data.isAdmin));
+    }
+
+    match /drivers/{driverId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /rides/{rideId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidRide(request.resource.data);
+      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /routes/{id} { allow read: if isAuthenticated(); allow write: if isAdmin(); }
+    match /vehicles/{id} { allow read: if isAuthenticated(); allow write: if isAdmin(); }
+    match /discounts/{id} { allow read: if isAuthenticated(); allow write: if isAdmin(); }
+    match /happyhours/{id} { allow read: if isAuthenticated(); allow write: if isAdmin(); }
+    match /leaves/{id} { allow read: if isAuthenticated(); allow write: if isAdmin(); }
+    match /shifts/{id} { allow read: if isAuthenticated(); allow write: if isAdmin(); }
+
+    match /test/{id} {
+      allow read: if true;
+    }
+  }
+}

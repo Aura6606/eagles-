@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Application user profile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "User's full name" },
+        "phone": { "type": "string", "description": "User's phone number" },
+        "isAdmin": { "type": "boolean", "description": "Whether the user is an admin" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["name", "phone", "isAdmin"]
+    },
+    "Driver": {
+      "title": "Driver",
+      "description": "Vehicle driver details",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Driver's name" },
+        "vehicleType": { "type": "string", "enum": ["Economy", "Comfort", "Bodaboda"], "description": "Type of vehicle" },
+        "carModel": { "type": "string", "description": "Model of the car" },
+        "plateNumber": { "type": "string", "description": "Vehicle plate number" },
+        "rating": { "type": "number", "description": "Driver rating (0-5)" },
+        "pricePerKm": { "type": "number", "description": "Price per kilometer in KES" },
+        "imageUrl": { "type": "string", "description": "URL to driver/vehicle image" }
+      },
+      "required": ["name", "vehicleType", "carModel", "plateNumber", "rating", "pricePerKm"]
+    },
+    "Ride": {
+      "title": "Ride",
+      "description": "A ride booking record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "ID of the user who booked" },
+        "driverId": { "type": "string", "description": "ID of the assigned driver" },
+        "pickup": { "type": "string", "description": "Pickup location name" },
+        "destination": { "type": "string", "description": "Destination location name" },
+        "distance": { "type": "number", "description": "Estimated distance in km" },
+        "fare": { "type": "number", "description": "Total fare in KES" },
+        "status": { "type": "string", "enum": ["Pending", "Accepted", "Completed", "Cancelled"], "description": "Current status of the ride" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Booking timestamp" }
+      },
+      "required": ["userId", "pickup", "destination", "distance", "fare", "status"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "Payment transaction record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "ID of the user" },
+        "rideId": { "type": "string", "description": "ID of the ride" },
+        "amount": { "type": "number", "description": "Amount paid" },
+        "method": { "type": "string", "description": "Payment method (e.g., M-Pesa)" },
+        "status": { "type": "string", "description": "Payment status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Payment timestamp" }
+      },
+      "required": ["userId", "rideId", "amount", "method", "status"]
+    },
+    "Route": {
+      "title": "Route",
+      "description": "Predefined routes",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Route name (e.g., CBD to Westlands)" },
+        "pickup": { "type": "string" },
+        "destination": { "type": "string" },
+        "baseDistance": { "type": "number" }
+      },
+      "required": ["name", "pickup", "destination", "baseDistance"]
+    },
+    "Vehicle": {
+      "title": "Vehicle",
+      "description": "Fleet management",
+      "type": "object",
+      "properties": {
+        "plateNumber": { "type": "string" },
+        "model": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string", "enum": ["Available", "In Use", "Maintenance"] }
+      },
+      "required": ["plateNumber", "model", "type", "status"]
+    },
+    "DriverLeave": {
+      "title": "Driver Leave",
+      "description": "Driver leave tracking",
+      "type": "object",
+      "properties": {
+        "driverId": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "reason": { "type": "string" }
+      },
+      "required": ["driverId", "startDate", "endDate"]
+    },
+    "WorkShift": {
+      "title": "Work Shift",
+      "description": "Driver shifts",
+      "type": "object",
+      "properties": {
+        "driverId": { "type": "string" },
+        "day": { "type": "string" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" }
+      },
+      "required": ["driverId", "day", "startTime", "endTime"]
+    },
+    "Discount": {
+      "title": "Discount",
+      "description": "Promo codes",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "percentage": { "type": "number" },
+        "expiryDate": { "type": "string", "format": "date" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["code", "percentage", "active"]
+    },
+    "HappyHour": {
+      "title": "Happy Hour",
+      "description": "Time-based discounts",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "discountPercentage": { "type": "number" },
+        "days": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["name", "startTime", "endTime", "discountPercentage", "days"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/drivers/{driverId}": { "schema": "Driver", "description": "Available drivers" },
+    "/rides/{rideId}": { "schema": "Ride", "description": "Ride bookings" },
+    "/payments/{paymentId}": { "schema": "Payment", "description": "Payment records" },
+    "/routes/{routeId}": { "schema": "Route", "description": "Predefined routes" },
+    "/vehicles/{vehicleId}": { "schema": "Vehicle", "description": "Fleet management" },
+    "/leaves/{leaveId}": { "schema": "DriverLeave", "description": "Driver leave tracking" },
+    "/shifts/{shiftId}": { "schema": "WorkShift", "description": "Driver shifts" },
+    "/discounts/{discountId}": { "schema": "Discount", "description": "Promo codes" },
+    "/happyhours/{hhId}": { "schema": "HappyHour", "description": "Time-based discounts" }
+  }
+}
