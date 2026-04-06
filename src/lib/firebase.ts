@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -18,9 +18,10 @@ const firestoreDatabaseId = import.meta.env.VITE_FIREBASE_FIRESTORE_DATABASE_ID 
 
 // Initialize Firebase SDK
 const app = initializeApp(config);
-export const db = getFirestore(app, firestoreDatabaseId);
+export const db = firestoreDatabaseId ? getFirestore(app, firestoreDatabaseId) : getFirestore(app);
 export const auth = getAuth();
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Error Handling Spec for Firestore Operations
 export enum OperationType {
@@ -76,6 +77,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 
 export {
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   onAuthStateChanged,
   collection,

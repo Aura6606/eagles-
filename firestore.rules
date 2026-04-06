@@ -71,7 +71,10 @@ service cloud.firestore {
     // ===============================================================
     function isValidUser(data) {
       return data.name is string && data.name.size() > 0 &&
-             data.isAdmin is bool;
+             data.isAdmin is bool &&
+             data.phone is string &&
+             data.uid == request.auth.uid &&
+             data.createdAt is timestamp;
     }
 
     function isValidRide(data) {

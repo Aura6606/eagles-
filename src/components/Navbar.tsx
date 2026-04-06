@@ -5,13 +5,17 @@ import { Car, LogOut, User as UserIcon, Menu, X, ShieldCheck } from 'lucide-reac
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Navbar() {
-  const { user, profile, login, logout } = useAuth();
+  const { user, profile, login, loginWithRedirect, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const pathname = location.pathname;
 
   const handleLogin = async () => {
     await login();
+  };
+
+  const handleLoginRedirect = async () => {
+    await loginWithRedirect();
   };
 
   const handleLogout = async () => {
@@ -55,12 +59,21 @@ export default function Navbar() {
                 </div>
               </>
             ) : (
-              <button 
-                onClick={handleLogin}
-                className="bg-green-500 text-black px-6 py-2 rounded-full font-semibold hover:bg-green-400 transition-all active:scale-95"
-              >
-                Login
-              </button>
+              <div className="flex items-center space-x-3">
+                <button 
+                  onClick={handleLogin}
+                  className="bg-green-500 text-black px-6 py-2 rounded-full font-semibold hover:bg-green-400 transition-all active:scale-95"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={handleLoginRedirect}
+                  className="text-xs text-zinc-500 hover:text-white transition-colors"
+                  title="Use redirect if popup is blocked"
+                >
+                  (Redirect)
+                </button>
+              </div>
             )}
           </div>
 
@@ -95,7 +108,10 @@ export default function Navbar() {
                   <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-md text-red-500 hover:bg-white/5">Logout</button>
                 </>
               ) : (
-                <button onClick={handleLogin} className="w-full bg-green-500 text-black px-3 py-2 rounded-md font-semibold">Login</button>
+                <div className="flex flex-col space-y-2">
+                  <button onClick={handleLogin} className="w-full bg-green-500 text-black px-3 py-2 rounded-md font-semibold">Login with Popup</button>
+                  <button onClick={handleLoginRedirect} className="w-full bg-zinc-800 text-white px-3 py-2 rounded-md font-semibold text-sm">Login with Redirect (Mobile)</button>
+                </div>
               )}
             </div>
           </motion.div>
